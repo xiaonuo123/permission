@@ -57,7 +57,7 @@ public class PermissionUtil {
         if (permissions.length > 0 && grantResults.length > 0) {
             if (grantResults[0] == -1) {
                 if (mListener != null) {
-
+                    mListener.onPermissionDenied();
                     mListener = null;
                 }
 
@@ -74,12 +74,21 @@ public class PermissionUtil {
         int result = ContextCompat.checkSelfPermission(context,permission);
         this.mListener = listener;
 
-        if (PackageManager.PERMISSION_DENIED == result) {
-            String[] permissions = {permission};
-            ActivityCompat.requestPermissions(context,permissions,8879);
-        } else if (PackageManager.PERMISSION_GRANTED == result) {
-            mListener.onPermissionGranted();
+        if (PackageManager.PERMISSION_GRANTED == result) {
+            if (mListener != null)
+                mListener.onPermissionGranted();
             mListener = null;
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(context,
+                    permission)) {
+                if (mListener != null)
+                    mListener.noNecessary();
+                mListener = null;
+            } else {
+                ActivityCompat.requestPermissions(context,
+                        new String[]{permission},
+                        8879);
+            }
         }
     }
 
