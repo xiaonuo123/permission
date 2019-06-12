@@ -37,3 +37,6 @@ PermissionUtil.getInstance().checkAndRequestPermission(this, permission, new Per
 
 });
 ```
+# Note</br>
+If your app lists normal permissions in its manifest (that is, permissions that don't pose much risk to the user's privacy or the device's operation), the system automatically grants those permissions to your app. </br>
+If your app lists dangerous permissions in its manifest (that is, permissions that could potentially affect the user's privacy or the device's normal operation), such as the SEND_SMS permission above, the user must explicitly agree to grant those permissions. 
