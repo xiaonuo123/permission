@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">permission</string>
+
+    <string name="permission_preliminary_explanation">该功能需要具备对应权限才能正常使用，请允许权限申请</string>
+    <string name="permission_preliminary_positive">好的</string>
+    <string name="permission_preliminary_negative">算了</string>
+
+    <string name="permission_further_explanation">请在系统设置页面内开启本应用的相关权限</string>
+    <string name="permission_further_positive">跳转</string>
+    <string name="permission_further_negative">算了</string>
 </resources>
