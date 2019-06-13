@@ -1,5 +1,6 @@
 package com.ernesto.permission;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,7 +43,7 @@ public class PermissionUtil {
         return mInstance;
     }
 
-    public void onRequestPermissionsResult(FragmentActivity context,int requestCode,
+    public void onRequestPermissionsResult(Activity context,int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (permissions.length > 0 && grantResults.length > 0) {
             if (grantResults[0] == -1) {
@@ -56,12 +57,7 @@ public class PermissionUtil {
         }
     }
 
-    public void checkAndRequestPermission(FragmentActivity context,String permission,PermissionListener listener){
-        this.checkAndRequestPermission(context,permission,listener,null,null,null,null,null,null);
-    }
-
-
-    public void checkAndRequestPermission(FragmentActivity context,String permission,PermissionListener listener,
+    public void checkAndRequestPermission(Activity context,String permission,PermissionListener listener,
                                           String title,String positiveBtn,String negativeBtn,
                                           String titleFurther,String positiveBtnFurther,String negativeBtnFurther) {
         initializeDefaultString(context);
@@ -107,10 +103,85 @@ public class PermissionUtil {
     }
 
 
-    private void showDialog(FragmentActivity activity,String permission,boolean needJump2Setting,
+    private void showDialog(Activity activity,String permission,boolean needJump2Setting,
                             String title,String positiveBtn,String negativeBtn) {
-        DialogFragment newFragment = PermissionDialog.newInstance(permission,needJump2Setting,title,positiveBtn,negativeBtn);
-        newFragment.show(activity.getSupportFragmentManager(), "dialog");
+        if (activity instanceof FragmentActivity) {
+            DialogFragment newFragment = PermissionDialog.newInstance(permission,needJump2Setting,title,positiveBtn,negativeBtn);
+            newFragment.show(((FragmentActivity)activity).getSupportFragmentManager(), "dialog");
+        } else {
+            android.app.DialogFragment newFragment = PermissionDialogOld.newInstance(permission,needJump2Setting,title,positiveBtn,negativeBtn);
+            newFragment.show(activity.getFragmentManager(),"dialog");
+        }
+
+    }
+
+    public static class PermissionDialogOld extends android.app.DialogFragment {
+
+        public static PermissionDialogOld newInstance(String permission,boolean needJump2Setting,
+                                                   String title,String positiveBtn,String negativeBtn) {
+            PermissionDialogOld dialog = new PermissionDialogOld();
+            Bundle bundle = new Bundle();
+            bundle.putString("permission",permission);
+            bundle.putString("title", TextUtils.isEmpty(title) ?
+                    (needJump2Setting ? sDefFurtherExplanation : sDefPreliminaryExplanation)
+                    : title);
+            bundle.putString("positiveBtn",TextUtils.isEmpty(positiveBtn) ?
+                    (needJump2Setting ? sDefFurtherPositive : sDefPreliminaryPositive)
+                    : positiveBtn);
+            bundle.putString("negativeBtn",TextUtils.isEmpty(negativeBtn) ?
+                    (needJump2Setting ? sDefFurtherNegative : sDefPreliminaryNegative)
+                    : negativeBtn);
+            bundle.putBoolean("needJump2Setting",needJump2Setting);
+            dialog.setArguments(bundle);
+            return dialog;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @NonNull
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            if (getActivity() != null) {
+                final String permission = getArguments() == null ? "" : getArguments().getString("permission");
+                final String title = getArguments() == null ? "" : getArguments().getString("title");
+                final String positiveBtn = getArguments() == null ? "" : getArguments().getString("positiveBtn");
+                final String negativeBtn = getArguments() == null ? "" : getArguments().getString("negativeBtn");
+                final boolean needJump2Setting = getArguments() == null || getArguments().getBoolean("needJump2Setting");
+                return new AlertDialog.Builder(getActivity())
+                        .setTitle(title)
+                        .setCancelable(false)
+                        .setPositiveButton(positiveBtn,
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        if (needJump2Setting) {
+                                            startActivity(new Intent(Settings.ACTION_SETTINGS));
+                                        } else {
+                                            if (getActivity() != null)
+                                                ActivityCompat.requestPermissions(getActivity(),
+                                                        new String[]{permission},
+                                                        8879);
+                                        }
+                                    }
+                                }
+                        )
+                        .setNegativeButton(negativeBtn,
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        if (sListener != null)
+                                            sListener.onPermissionDenied();
+                                        sListener = null;
+                                    }
+                                }
+                        )
+                        .create();
+            } else {
+                return null;
+            }
+
+        }
     }
 
     public static class PermissionDialog extends DialogFragment {
