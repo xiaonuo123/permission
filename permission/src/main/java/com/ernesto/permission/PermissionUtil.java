@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.Log;
 
 
 public class PermissionUtil {
@@ -109,8 +110,14 @@ public class PermissionUtil {
             DialogFragment newFragment = PermissionDialog.newInstance(permission,needJump2Setting,title,positiveBtn,negativeBtn);
             newFragment.show(((FragmentActivity)activity).getSupportFragmentManager(), "dialog");
         } else {
-            android.app.DialogFragment newFragment = PermissionDialogOld.newInstance(permission,needJump2Setting,title,positiveBtn,negativeBtn);
-            newFragment.show(activity.getFragmentManager(),"dialog");
+
+            try {
+                android.app.DialogFragment newFragment = PermissionDialogOld.newInstance(permission,needJump2Setting,title,positiveBtn,negativeBtn);
+                newFragment.show(activity.getFragmentManager(),"dialog");
+            } catch (Exception e) {
+                Log.d("kratos",e.getMessage());
+            }
+
         }
 
     }
