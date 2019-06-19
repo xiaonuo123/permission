@@ -108,9 +108,13 @@ public class PermissionUtil {
     private void showDialogUnreasonable(final Activity activity,final String permission,final boolean needJump2Setting,
                                         String title,String positiveBtn,String negativeBtn) {
         new AlertDialog.Builder(activity)
-                .setTitle(title)
+                .setTitle(TextUtils.isEmpty(title) ?
+                        (needJump2Setting ? sDefFurtherExplanation : sDefPreliminaryExplanation)
+                        : title)
                 .setCancelable(false)
-                .setPositiveButton(positiveBtn,
+                .setPositiveButton(TextUtils.isEmpty(positiveBtn) ?
+                                (needJump2Setting ? sDefFurtherPositive : sDefPreliminaryPositive)
+                                : positiveBtn,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (needJump2Setting) {
@@ -124,7 +128,9 @@ public class PermissionUtil {
                             }
                         }
                 )
-                .setNegativeButton(negativeBtn,
+                .setNegativeButton(TextUtils.isEmpty(negativeBtn) ?
+                                (needJump2Setting ? sDefFurtherNegative : sDefPreliminaryNegative)
+                                : negativeBtn,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (sListener != null)
