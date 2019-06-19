@@ -48,7 +48,8 @@ public class PermissionUtil {
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (permissions.length > 0 && grantResults.length > 0) {
             if (grantResults[0] == -1) {
-                showDialog(context,permissions[0],true,sFurtherExplanation,sFurtherPositive,sFurtherNegative);
+                showDialogUnreasonable(context,permissions[0],true,sFurtherExplanation,sFurtherPositive,sFurtherNegative);
+//                showDialog(context,permissions[0],true,sFurtherExplanation,sFurtherPositive,sFurtherNegative);
             } else if (grantResults[0] == 0) {
                 if (sListener != null) {
                     sListener.onPermissionGranted();
@@ -76,7 +77,8 @@ public class PermissionUtil {
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(context,
                     permission)) {
-                showDialog(context,permission,false,title,positiveBtn,negativeBtn);
+                showDialogUnreasonable(context,permission,false,title,positiveBtn,negativeBtn);
+//                showDialog(context,permission,false,title,positiveBtn,negativeBtn);
             } else {
                 ActivityCompat.requestPermissions(context,
                         new String[]{permission},
@@ -103,6 +105,36 @@ public class PermissionUtil {
         void onPermissionDenied();
     }
 
+    private void showDialogUnreasonable(final Activity activity,final String permission,final boolean needJump2Setting,
+                                        String title,String positiveBtn,String negativeBtn) {
+        new AlertDialog.Builder(activity)
+                .setTitle(title)
+                .setCancelable(false)
+                .setPositiveButton(positiveBtn,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (needJump2Setting) {
+                                    activity.startActivity(new Intent(Settings.ACTION_SETTINGS));
+                                } else {
+                                    if (activity != null)
+                                        ActivityCompat.requestPermissions(activity,
+                                                new String[]{permission},
+                                                8879);
+                                }
+                            }
+                        }
+                )
+                .setNegativeButton(negativeBtn,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (sListener != null)
+                                    sListener.onPermissionDenied();
+                                sListener = null;
+                            }
+                        }
+                )
+                .create().show();
+    }
 
     private void showDialog(Activity activity,String permission,boolean needJump2Setting,
                             String title,String positiveBtn,String negativeBtn) {
