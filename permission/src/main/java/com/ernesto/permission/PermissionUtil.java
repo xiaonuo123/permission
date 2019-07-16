@@ -53,7 +53,7 @@ public class PermissionUtil {
             } else if (grantResults[0] == 0) {
                 if (sListener != null) {
                     sListener.onPermissionGranted();
-                    sListener = null;
+//                    sListener = null;
                 }
             }
         }
@@ -73,7 +73,7 @@ public class PermissionUtil {
         if (PackageManager.PERMISSION_GRANTED == result) {
             if (sListener != null)
                 sListener.onPermissionGranted();
-            sListener = null;
+//            sListener = null;
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(context,
                     permission)) {
@@ -135,7 +135,7 @@ public class PermissionUtil {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (sListener != null)
                                     sListener.onPermissionDenied();
-                                sListener = null;
+//                                sListener = null;
                             }
                         }
                 )
@@ -217,7 +217,7 @@ public class PermissionUtil {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         if (sListener != null)
                                             sListener.onPermissionDenied();
-                                        sListener = null;
+//                                        sListener = null;
                                     }
                                 }
                         )
@@ -286,7 +286,7 @@ public class PermissionUtil {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         if (sListener != null)
                                             sListener.onPermissionDenied();
-                                        sListener = null;
+//                                        sListener = null;
                                     }
                                 }
                         )
