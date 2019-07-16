@@ -63,10 +63,12 @@ public class PermissionUtil {
                                           String title,String positiveBtn,String negativeBtn,
                                           String titleFurther,String positiveBtnFurther,String negativeBtnFurther) {
         initializeDefaultString(context);
-        int result = ContextCompat.checkSelfPermission(context,permission);
+
         if (sListener != null)
             sListener = null;
         sListener = listener;
+
+        int result = ContextCompat.checkSelfPermission(context,permission);
 
         sFurtherExplanation = titleFurther;
         sFurtherPositive = positiveBtnFurther;
