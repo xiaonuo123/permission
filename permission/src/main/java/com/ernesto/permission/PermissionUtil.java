@@ -47,14 +47,64 @@ public class PermissionUtil {
     public void onRequestPermissionsResult(Activity context,int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (permissions.length > 0 && grantResults.length > 0) {
-            if (grantResults[0] == -1) {
-                showDialogUnreasonable(context,permissions[0],true,sFurtherExplanation,sFurtherPositive,sFurtherNegative);
-//                showDialog(context,permissions[0],true,sFurtherExplanation,sFurtherPositive,sFurtherNegative);
-            } else if (grantResults[0] == 0) {
+            int grantResult = 0;
+            for (int i = 0;i < permissions.length;i++) {
+                grantResult |= grantResults[i];
+            }
+            if (grantResult == -1) {
+                showDialogUnreasonable(context,permissions,true,sFurtherExplanation,sFurtherPositive,sFurtherNegative);
+            } else if (grantResult == 0) {
                 if (sListener != null) {
                     sListener.onPermissionGranted();
-//                    sListener = null;
                 }
+            }
+        }
+    }
+
+    public void checkAndRequestPermissions(Activity context,String[] permission,PermissionListener listener){
+        checkAndRequestPermissions(context,permission,listener,null,null,null,null,null,null);
+    }
+
+    public void checkAndRequestPermission(Activity context,String permission,PermissionListener listener){
+        checkAndRequestPermission(context,permission,listener,null,null,null,null,null,null);
+    }
+
+    public void checkAndRequestPermissions(Activity context,String[] permission,PermissionListener listener,
+                                          String title,String positiveBtn,String negativeBtn,
+                                          String titleFurther,String positiveBtnFurther,String negativeBtnFurther) {
+        if (permission == null || permission.length < 1)
+            throw new IllegalArgumentException("argument String[] permission can not be empty");
+
+        initializeDefaultString(context);
+
+        if (sListener != null)
+            sListener = null;
+        sListener = listener;
+
+        int result = 0;
+        for (int i = 0;i < permission.length;i++) {
+            result |= ContextCompat.checkSelfPermission(context,permission[i]);
+        }
+
+        sFurtherExplanation = titleFurther;
+        sFurtherPositive = positiveBtnFurther;
+        sFurtherNegative = negativeBtnFurther;
+
+        if (PackageManager.PERMISSION_GRANTED == result) {
+            if (sListener != null)
+                sListener.onPermissionGranted();
+        } else {
+            boolean shouldShowRequestPermissionRationale = false;
+            for (int i = 0;i < permission.length;i++) {
+                shouldShowRequestPermissionRationale &= ActivityCompat.shouldShowRequestPermissionRationale(context,
+                        permission[i]);
+            }
+            if (shouldShowRequestPermissionRationale) {
+                showDialogUnreasonable(context,permission,false,title,positiveBtn,negativeBtn);
+            } else {
+                ActivityCompat.requestPermissions(context,
+                        permission,
+                        8879);
             }
         }
     }
@@ -62,6 +112,9 @@ public class PermissionUtil {
     public void checkAndRequestPermission(Activity context,String permission,PermissionListener listener,
                                           String title,String positiveBtn,String negativeBtn,
                                           String titleFurther,String positiveBtnFurther,String negativeBtnFurther) {
+        if (TextUtils.isEmpty(permission))
+            throw new IllegalArgumentException("argument String permission can not be empty");
+
         initializeDefaultString(context);
 
         if (sListener != null)
@@ -77,12 +130,10 @@ public class PermissionUtil {
         if (PackageManager.PERMISSION_GRANTED == result) {
             if (sListener != null)
                 sListener.onPermissionGranted();
-//            sListener = null;
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(context,
                     permission)) {
                 showDialogUnreasonable(context,permission,false,title,positiveBtn,negativeBtn);
-//                showDialog(context,permission,false,title,positiveBtn,negativeBtn);
             } else {
                 ActivityCompat.requestPermissions(context,
                         new String[]{permission},
@@ -107,6 +158,42 @@ public class PermissionUtil {
     public interface PermissionListener {
         void onPermissionGranted();
         void onPermissionDenied();
+    }
+
+    private void showDialogUnreasonable(final Activity activity,final String[] permission,final boolean needJump2Setting,
+                                        String title,String positiveBtn,String negativeBtn) {
+        new AlertDialog.Builder(activity)
+                .setTitle(TextUtils.isEmpty(title) ?
+                        (needJump2Setting ? sDefFurtherExplanation : sDefPreliminaryExplanation)
+                        : title)
+                .setCancelable(false)
+                .setPositiveButton(TextUtils.isEmpty(positiveBtn) ?
+                                (needJump2Setting ? sDefFurtherPositive : sDefPreliminaryPositive)
+                                : positiveBtn,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (needJump2Setting) {
+                                    activity.startActivity(new Intent(Settings.ACTION_SETTINGS));
+                                } else {
+                                    if (activity != null)
+                                        ActivityCompat.requestPermissions(activity,
+                                                permission,
+                                                8879);
+                                }
+                            }
+                        }
+                )
+                .setNegativeButton(TextUtils.isEmpty(negativeBtn) ?
+                                (needJump2Setting ? sDefFurtherNegative : sDefPreliminaryNegative)
+                                : negativeBtn,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                if (sListener != null)
+                                    sListener.onPermissionDenied();
+                            }
+                        }
+                )
+                .create().show();
     }
 
     private void showDialogUnreasonable(final Activity activity,final String permission,final boolean needJump2Setting,
@@ -139,7 +226,6 @@ public class PermissionUtil {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (sListener != null)
                                     sListener.onPermissionDenied();
-//                                sListener = null;
                             }
                         }
                 )
