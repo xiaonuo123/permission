@@ -160,6 +160,8 @@ public class PermissionUtil {
         void onPermissionDenied();
     }
 
+    public static final int REQUEST_PERMISSION_CODE = 3874;
+
     private void showDialogUnreasonable(final Activity activity,final String[] permission,final boolean needJump2Setting,
                                         String title,String positiveBtn,String negativeBtn) {
         new AlertDialog.Builder(activity)
@@ -173,7 +175,7 @@ public class PermissionUtil {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (needJump2Setting) {
-                                    activity.startActivity(new Intent(Settings.ACTION_SETTINGS));
+                                    activity.startActivityForResult(new Intent(Settings.ACTION_SETTINGS),REQUEST_PERMISSION_CODE);
                                 } else {
                                     if (activity != null)
                                         ActivityCompat.requestPermissions(activity,
@@ -209,7 +211,7 @@ public class PermissionUtil {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (needJump2Setting) {
-                                    activity.startActivity(new Intent(Settings.ACTION_SETTINGS));
+                                    activity.startActivityForResult(new Intent(Settings.ACTION_SETTINGS),REQUEST_PERMISSION_CODE);
                                 } else {
                                     if (activity != null)
                                         ActivityCompat.requestPermissions(activity,
