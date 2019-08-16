@@ -9,7 +9,7 @@ allprojects {
 ```
 download the latest AAR from Jitpack via Gradle:</br>
 ```Bash
-implementation 'com.github.xiaonuo123:permission:1.0.3'
+implementation 'com.github.xiaonuo123:permission:1.1.0.1'
 ```
 # Procedure</br>
 1.call method onRequestPermissionsResult() in your base activity:</br>
